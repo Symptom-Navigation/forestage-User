@@ -1,0 +1,13 @@
+version: "3"
+services:
+  mysql:
+    image: mysql
+    container_name: inquiry_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dbname
+    volumes:
+      - ~/Documents/mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
