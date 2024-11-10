@@ -311,9 +311,22 @@
         </el-row>
       </div>
     </div>
+    <div
+      style="
+        padding-left: 5%;
+        padding-right: 5%;
+        padding-bottom: 10%;
+        z-index: 10;
+      "
+    >
+      <NuxtLayout name="reminder"> </NuxtLayout>
+    </div>
 
     <!-- 轮播图 -->
-    <div class="picture" style="width: 90%; margin-left: 5%">
+    <div
+      class="picture"
+      style="width: 90%; margin-left: 5%; margin-bottom: 15%; z-index: 1"
+    >
       <div class="block text-center" style="text-align: center">
         <el-carousel height="200px">
           <el-carousel-item v-for="item in imageUrl" :key="item">
@@ -329,36 +342,29 @@
   </div>
 </template>
 <script lang="ts" setup>
-// 轮播图（静态）
-const imageUrl = [
-  {
-    url: "https://img.picui.cn/free/2024/09/23/66f09663bc715.png",
-  },
-  {
-    url: "https://img.picui.cn/free/2024/09/23/66f0966530c3d.png",
-  },
-  {
-    url: "https://img.picui.cn/free/2024/09/23/66f0966642665.png",
-  },
-  {
-    url: "https://img.picui.cn/free/2024/09/23/66f096676bb08.png",
-  },
-];
 import { onMounted, reactive, ref } from "vue";
 import service from "../utils/request";
-import { User, Avatar, Search } from "@element-plus/icons-vue";
+
+const imageUrl = [
+  { url: "https://img.picui.cn/free/2024/09/23/66f09663bc715.png" },
+  { url: "https://img.picui.cn/free/2024/09/23/66f0966530c3d.png" },
+  { url: "https://img.picui.cn/free/2024/09/23/66f0966642665.png" },
+  { url: "https://img.picui.cn/free/2024/09/23/66f096676bb08.png" },
+];
+
 const appointmentsData = reactive([] as any[]);
-// const imageUrl = reactive([]);
 const isShow = ref(false);
 const userImg = ref("");
+
 const focusFun = () => {
   isShow.value = true;
 };
+
 onMounted(() => {
   getAppointmentsData();
-  // getImgs();
   getUserImg();
 });
+
 const getAppointmentsData = async () => {
   const userId = localStorage.getItem("userId");
   await service.get(`appointments/user/${userId}`).then((res: any) => {
@@ -367,24 +373,52 @@ const getAppointmentsData = async () => {
     }
   });
 };
-// const getImgs = async () => {
-//   // 接口路径还没有，自己编造的  获取轮播图图片的路径
-//   await service.get(`/getUserImgs`).then((res: any) => {
-//     if (res.code === "200") {
-//       imageUrl.push(...res.data);
-//     }
-//   });
-// };
+
 const getUserImg = async () => {
-  // 接口路径还没有，自己编造的  获取用户图像的路径
   await service.get(`/auth/user/info`).then((res: any) => {
     if (res.status === "200") {
-      userImg.value === res.data;
+      userImg.value = res.data;
     }
   });
 };
 </script>
+
 <style scoped>
+.container {
+  position: relative;
+  width: 100%;
+  background-color: #fff2e0;
+}
+
+.carousel {
+  width: 90%;
+  margin: 0 auto 15%;
+  z-index: 1;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
 /* 预约展示区样式 */
 .registion-show {
   margin-top: 5%;
@@ -396,11 +430,13 @@ const getUserImg = async () => {
   margin-left: 5%;
   border-radius: 15px;
 }
+
 .search-btn {
   background-color: lightgreen;
   border-radius: 15px;
   color: white;
 }
+
 .registion-latest {
   width: 90%;
   height: 60px;
@@ -411,7 +447,7 @@ const getUserImg = async () => {
 }
 
 /* 导航区样式 */
-div.navigation1 {
+.navigation1 {
   margin-top: 5%;
   width: 90%;
   height: 20%;
@@ -422,34 +458,29 @@ div.navigation1 {
   border-radius: 15px;
   margin-bottom: 10%;
 }
+
 .navigation1 a {
   color: black;
 }
+
 .test {
   width: 84%;
   margin-left: 8%;
   padding-top: 1%;
   text-align: center;
-  /* margin-top: 150px; */
 }
+
 .navigation1 .el-row {
   margin-top: 3%;
 }
+
 .grid-content {
   text-align: center;
 }
-.container {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: #fff2e0;
-}
+
 .com-bar a {
   float: right;
-  color: black; /* 设置文字颜色为浅绿色 */
+  color: black;
   text-decoration: none;
 }
-/* img {
-  float: left;
-} */
 </style>
