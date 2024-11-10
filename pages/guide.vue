@@ -287,7 +287,7 @@ onMounted(() => {
 
 .footer-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 8%;
   width: 100%;
 }
 
@@ -302,7 +302,7 @@ onMounted(() => {
   border-radius: 10px 10px 0 0;
   background-color: #fff2e0;
   left: 2%;
-  bottom: 8%;
+  bottom: 100px;
 }
 
 .bottom-bar input {

@@ -230,7 +230,7 @@
             >
           </el-col>
           <el-col :span="6">
-            <a :href="'/user/'">
+            <a :href="'/encyclopedia/'">
               <div class="grid-content ep-bg-purple" />
               <div style="text-align: center">
                 <svg
@@ -305,7 +305,7 @@
                   ></path>
                 </svg>
               </div>
-              知识</a
+              百科</a
             >
           </el-col>
         </el-row>
