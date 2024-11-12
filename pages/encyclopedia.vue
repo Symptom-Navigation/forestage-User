@@ -45,12 +45,9 @@ const error = ref("");
 
 const fetchDiseaseInfo = async () => {
   try {
-    const res = await axios.get(
-      "http://127.0.0.1:4523/m2/5085608-4747844-default/231964069",
-      {
-        params: { symptom: symptom.value },
-      }
-    );
+    const res = await axios.get("http://localhost:5000/", {
+      params: { symptom: symptom.value },
+    });
     if (res.status === 200) {
       if (res.data.Summary_text || res.data.Basic_info) {
         diseaseInfo.value = res.data;

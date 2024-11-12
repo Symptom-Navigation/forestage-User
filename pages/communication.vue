@@ -120,7 +120,12 @@
         >
           <img :src="chat.avatar" alt="avatar" class="avatar" />
           <div class="chat-info">
-            <div class="chat-name">{{ chat.name }}</div>
+            <div class="chat-name">
+              {{ chat.name }}
+              <span class="chat-rating"
+                >评分: {{ chat.rating.toFixed(1) }} ⭐</span
+              >
+            </div>
             <div class="chat-last-message">{{ chat.lastMessage }}</div>
           </div>
         </div>
@@ -145,6 +150,7 @@ interface Chat {
   name: string;
   lastMessage: string;
   avatar: string;
+  rating: number; // 添加评分属性
 }
 
 interface Message {
@@ -157,8 +163,30 @@ interface Message {
 
 const router = useRouter();
 const searchKeyword = ref("");
-const chats = ref<Chat[]>([]);
-const filteredChats = ref<Chat[]>([]);
+const chats = ref<Chat[]>([
+  {
+    id: 1,
+    name: "Dr. Alice",
+    lastMessage: "你好！",
+    avatar: "https://img.picui.cn/free/2024/09/23/66f096676bb08.png",
+    rating: Math.random() * 1 + 4,
+  },
+  {
+    id: 2,
+    name: "Dr. Bob",
+    lastMessage: "今天怎么样？",
+    avatar: "https://img.picui.cn/free/2024/11/13/6733d10b60909.png",
+    rating: Math.random() * 1 + 4,
+  },
+  {
+    id: 3,
+    name: "Dr. Charlie",
+    lastMessage: "明天见！",
+    avatar: "https://img.picui.cn/free/2024/11/13/6733d13063896.png",
+    rating: Math.random() * 1 + 4,
+  },
+]);
+const filteredChats = ref<Chat[]>(chats.value);
 
 const filterChats = debounce(() => {
   filteredChats.value = chats.value.filter((chat) =>
@@ -187,6 +215,7 @@ const connectWebSocket = () => {
         name: message.from,
         lastMessage: message.content,
         avatar: "https://img.picui.cn/free/2024/09/23/66f096676bb08.png", // 默认头像
+        rating: Math.random() * 1 + 4, // 随机评分
       });
     }
 
@@ -210,7 +239,6 @@ onMounted(() => {
   connectWebSocket();
 });
 </script>
-
 <style scoped>
 .com-top-bar {
   height: 200px;
@@ -265,6 +293,11 @@ onMounted(() => {
 
 .chat-name {
   font-weight: bold;
+}
+
+.chat-rating {
+  color: #ffa500; /* 评分颜色 */
+  margin-left: 10px; /* 添加左边距 */
 }
 
 .chat-last-message {

@@ -41,14 +41,57 @@
             required
             class="form-input"
           />
-          <label>提醒时间:</label>
-          <input
-            type="text"
-            v-model="newReminder.timeRepeat"
-            placeholder="1日X次或自定义时间"
-            required
-            class="form-input"
-          />
+          <div class="frequency-container">
+            <label>提醒频率:</label>
+            <input
+              type="number"
+              v-model="frequency"
+              @input="calculateReminderTimes"
+              required
+              class="form-input frequency-input"
+            />
+            <span>次/日</span>
+            <div class="custom-reminder">
+              <input
+                type="radio"
+                id="custom-time"
+                value="custom"
+                v-model="reminderTime"
+                :disabled="!frequency"
+              />
+              <label for="custom-time">自定义提醒时间</label>
+            </div>
+          </div>
+          <div v-if="reminderTime === 'custom'" class="custom-times-container">
+            <div
+              v-for="(time, index) in customTimes"
+              :key="index"
+              class="custom-time-input"
+            >
+              <input
+                type="datetime-local"
+                v-model="customTimes[index]"
+                class="form-input"
+                readonly
+              />
+            </div>
+            <div class="custom-time-buttons">
+              <button
+                type="button"
+                @click="incrementFrequency"
+                class="small-button"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                @click="decrementFrequency"
+                class="small-button"
+              >
+                -
+              </button>
+            </div>
+          </div>
           <div class="modal-buttons">
             <button type="submit" class="modal-button">添加</button>
             <button
@@ -131,7 +174,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
@@ -143,31 +185,29 @@ interface Reminder {
   startTime: string;
   endTime: string;
   timeRepeat: string;
+  username: string;
+  prevTime: string;
 }
 
 const reminders = ref<Reminder[]>([
   {
     id: "1",
-    name: "吃早餐",
-    nextTime: "2024-11-11T08:00:00Z",
-    startTime: "2024-11-11T07:00:00Z",
-    endTime: "2024-11-11T08:30:00Z",
+    username: "",
+    prevTime: "",
+    name: "吃药",
+    nextTime: "2024-11-13T08:00:00Z",
+    startTime: "2024-11-13T07:00:00Z",
+    endTime: "2024-11-13T08:30:00Z",
     timeRepeat: "每天一次",
   },
   {
     id: "2",
-    name: "午休",
-    nextTime: "2024-11-11T12:00:00Z",
-    startTime: "2024-11-11T12:00:00Z",
-    endTime: "2024-11-11T13:00:00Z",
-    timeRepeat: "每天一次",
-  },
-  {
-    id: "3",
-    name: "晚餐",
-    nextTime: "2024-11-11T18:00:00Z",
-    startTime: "2024-11-11T18:00:00Z",
-    endTime: "2024-11-11T19:00:00Z",
+    name: "量体温",
+    username: "",
+    prevTime: "",
+    nextTime: "2024-11-13T12:00:00Z",
+    startTime: "2024-11-13T12:00:00Z",
+    endTime: "2024-11-13T13:00:00Z",
     timeRepeat: "每天一次",
   },
 ]);
@@ -179,6 +219,8 @@ const showEditReminderModal = ref(false);
 const newReminder = ref<Reminder>({
   id: "",
   name: "",
+  username: "Test",
+  prevTime: "",
   nextTime: "",
   startTime: "",
   endTime: "",
@@ -192,11 +234,17 @@ const currentReminder = ref<Reminder>({
   startTime: "",
   endTime: "",
   timeRepeat: "",
+  username: "Test",
+  prevTime: "",
 });
+
+const frequency = ref<number | null>(null);
+const reminderTime = ref<string>("");
+const customTimes = ref<string[]>([]);
 
 const fetchReminders = () => {
   axios
-    .get("http://localhost:8084/reminder?username=1")
+    .get("http://localhost:8084/reminder?username=Test")
     .then((response) => {
       reminders.value = response.data;
     })
@@ -264,6 +312,8 @@ const resetNewReminder = () => {
   newReminder.value = {
     id: "",
     name: "",
+    username: "Test",
+    prevTime: "",
     nextTime: "",
     startTime: "",
     endTime: "",
@@ -276,10 +326,38 @@ const formatTime = (time: string) => {
   return date.toLocaleString();
 };
 
+const calculateReminderTimes = () => {
+  if (frequency.value) {
+    const interval = 24 / frequency.value;
+    const now = new Date();
+    customTimes.value = [];
+    for (let i = 0; i < frequency.value; i++) {
+      const reminderTime = new Date(
+        now.getTime() + i * interval * 60 * 60 * 1000
+      );
+      customTimes.value.push(reminderTime.toISOString().slice(0, 16));
+    }
+  }
+};
+
+const incrementFrequency = () => {
+  if (frequency.value !== null) {
+    frequency.value++;
+    calculateReminderTimes();
+  }
+};
+
+const decrementFrequency = () => {
+  if (frequency.value !== null && frequency.value > 1) {
+    frequency.value--;
+    calculateReminderTimes();
+  }
+};
+
 onMounted(fetchReminders);
 </script>
 
-<style>
+<style scoped>
 .container-rem {
   margin: 0 auto;
   padding: 20px;
@@ -348,6 +426,7 @@ onMounted(fetchReminders);
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto; /* 添加滚动功能 */
 }
 
 .modal-content {
@@ -415,5 +494,60 @@ onMounted(fetchReminders);
 
 .manage-button:hover {
   background-color: #d3d3d3;
+}
+
+/* 新增样式 */
+.custom-reminder input[type="datetime-local"] {
+  width: 150px; /* 调整宽度 */
+  margin-right: 10px; /* 添加右边距 */
+  display: inline-block; /* 确保在同一行 */
+}
+
+.custom-times-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 水平居中 */
+}
+
+.custom-time-input {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.custom-time-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.small-button {
+  margin: 0 5px;
+  padding: 10px; /* 增加按钮宽度 */
+  margin: 20px;
+  margin-top: -10px;
+  width: 60px;
+  font-size: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #d3d3d3;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.small-button:hover {
+  background-color: #1a1111;
+}
+
+.frequency-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.frequency-input {
+  width: 20px; /* 减短输入框宽度 */
+  margin-right: 10px;
 }
 </style>
