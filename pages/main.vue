@@ -311,32 +311,34 @@
         </el-row>
       </div>
     </div>
-    <div
-      style="
-        padding-left: 5%;
-        padding-right: 5%;
-        padding-bottom: 10%;
-        z-index: 10;
-      "
-    >
-      <NuxtLayout name="reminder"> </NuxtLayout>
-    </div>
+    <div>
+      <div
+        style="
+          padding-left: 5%;
+          padding-right: 5%;
+          padding-bottom: 10%;
+          z-index: 10;
+        "
+      >
+        <NuxtLayout name="reminder"> </NuxtLayout>
+      </div>
 
-    <!-- 轮播图 -->
-    <div
-      class="picture"
-      style="width: 90%; margin-left: 5%; margin-bottom: 15%; z-index: 1"
-    >
-      <div style="text-align: center">
-        <el-carousel height="200px">
-          <el-carousel-item v-for="item in imageUrl" :key="item">
-            <img
-              :src="item.url"
-              alt=""
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
-          </el-carousel-item>
-        </el-carousel>
+      <!-- 轮播图 -->
+      <div
+        class="picture"
+        style="width: 90%; margin-left: 5%; margin-bottom: 15%; z-index: 1"
+      >
+        <div style="text-align: center">
+          <el-carousel height="200px">
+            <el-carousel-item v-for="item in imageUrl" :key="item">
+              <img
+                :src="item.url"
+                alt=""
+                style="width: 100%; height: 100%; object-fit: cover"
+              />
+            </el-carousel-item>
+          </el-carousel>
+        </div>
       </div>
     </div>
   </div>

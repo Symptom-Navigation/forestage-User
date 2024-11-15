@@ -14,6 +14,7 @@ export default defineNuxtConfig({
   ],
 
   modules: ['@vant/nuxt'],
+
   vant: {
     /** Options */
   },
@@ -46,8 +47,6 @@ export default defineNuxtConfig({
   build: {
     transpile: ['three/examples/jsm/loaders/GLTFLoader'],
   },
+
+  compatibilityDate: '2024-11-15',
 });
-
-
-
-

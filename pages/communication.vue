@@ -166,21 +166,15 @@ const searchKeyword = ref("");
 const chats = ref<Chat[]>([
   {
     id: 1,
-    name: "Dr. Alice",
-    lastMessage: "你好！",
-    avatar: "https://img.picui.cn/free/2024/09/23/66f096676bb08.png",
-    rating: Math.random() * 1 + 4,
-  },
-  {
-    id: 2,
-    name: "Dr. Bob",
-    lastMessage: "今天怎么样？",
+    name: "李医生",
+    lastMessage: "......",
     avatar: "https://img.picui.cn/free/2024/11/13/6733d10b60909.png",
     rating: Math.random() * 1 + 4,
   },
+
   {
-    id: 3,
-    name: "Dr. Charlie",
+    id: 2,
+    name: "孙医生",
     lastMessage: "明天见！",
     avatar: "https://img.picui.cn/free/2024/11/13/6733d13063896.png",
     rating: Math.random() * 1 + 4,
@@ -204,17 +198,21 @@ const connectWebSocket = () => {
   const tokenObj = getToken();
   console.error("Token2:", tokenObj);
   const token = typeof tokenObj === "string" ? tokenObj : tokenObj.token;
+
   if (!token) {
     console.error("No JWT token found");
     return;
   }
 
-  const wsUrl = `ws://localhost:8081?token=${token}`;
+  // 打印 JWT 以便检查
+  console.log("JWT Token:", token);
+
+  const wsUrl = `ws://localhost:8081`;
   console.error("WebSocket URL:", wsUrl);
-  const ws = new WebSocket(wsUrl);
+  const ws = new WebSocket(wsUrl, token); // 在子协议中传递 JWT
 
   ws.onmessage = (event) => {
-    const message: Message = JSON.parse(event.data);
+    const message = JSON.parse(event.data);
     const existingChat = chats.value.find((chat) => chat.id === message.id);
 
     if (existingChat) {

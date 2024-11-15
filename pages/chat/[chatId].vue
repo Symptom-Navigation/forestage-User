@@ -1,6 +1,6 @@
 <template>
   <div class="chat-container">
-    <header-bar :chatName="chatName" />
+    <HeaderBar :chatName="chatName" :chatRating="chatRating" />
     <div class="messages">
       <div v-for="(message, index) in messages" :key="index" class="message">
         <div :class="['bubble', message.sender === 'me' ? 'me' : 'other']">
@@ -27,19 +27,18 @@
     <div v-if="showOptions" class="options-bar">
       <div class="options-row">
         <button @click="triggerFileInput">
-          <el-icon><upload /></el-icon> 文件
+          <el-icon><Upload /></el-icon> 文件
         </button>
         <button @click="openCamera">
-          <el-icon><camera /></el-icon> 拍摄
+          <el-icon><Camera /></el-icon> 拍摄
         </button>
         <button @click="selectOption('导诊')">
-          <el-icon><medal /></el-icon> 导诊
+          <el-icon><Medal /></el-icon> 导诊
         </button>
         <button @click="selectOption('挂号')">
-          <el-icon><document /></el-icon> 挂号
+          <el-icon><Document /></el-icon> 挂号
         </button>
       </div>
-      <div class="options-row"></div>
     </div>
     <input
       type="file"
@@ -59,7 +58,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import HeaderBar from "../components/HeaderBar.vue";
+import HeaderBar from "~/components/HeaderBar.vue";
 import { Upload, Camera, Medal, Document } from "@element-plus/icons-vue";
 
 interface Message {
@@ -74,7 +73,12 @@ const router = useRouter();
 const chatName = ref<string>(
   Array.isArray(route.params.chatName)
     ? route.params.chatName[0]
-    : route.params.chatName || "未知用户(未知门诊)"
+    : route.params.chatName || "T2"
+);
+const chatRating = ref<number>(
+  Array.isArray(route.params.chatRating)
+    ? parseFloat(route.params.chatRating[0])
+    : parseFloat(route.params.chatRating) || 0
 );
 
 const messages = ref<Message[]>([]);
@@ -174,17 +178,27 @@ const takePhoto = () => {
   }
 };
 
-const navigateTo = (routeName: string) => {
-  router.push({ name: routeName });
-};
-
 const selectOption = (option: string) => {
   console.log(`Selected option: ${option}`);
   showOptions.value = false;
 };
 
 const connectWebSocket = () => {
-  ws = new WebSocket("ws://localhost:8081", ["jwt-token"]);
+  const tokenObj = getToken();
+  console.error("Token2:", tokenObj);
+  const token = typeof tokenObj === "string" ? tokenObj : tokenObj.token;
+
+  if (!token) {
+    console.error("No JWT token found");
+    return;
+  }
+
+  // 打印 JWT 以便检查
+  console.log("JWT Token:", token);
+
+  const wsUrl = `ws://localhost:8081`;
+  console.error("WebSocket URL:", wsUrl);
+  ws = new WebSocket(wsUrl, token); // 在子协议中传递 JWT
 
   ws.onmessage = (event) => {
     const message = JSON.parse(event.data);
@@ -233,8 +247,7 @@ const buttonClass = computed(() => {
   }
 });
 </script>
-
-<style>
+<style scoped>
 .chat-container {
   display: flex;
   flex-direction: column;

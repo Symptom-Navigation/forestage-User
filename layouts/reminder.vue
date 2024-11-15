@@ -455,7 +455,6 @@ const decrementFrequency = () => {
 .action-button:hover {
   background-color: #d3d3d3;
 }
-
 .modal {
   position: fixed;
   top: 0;
@@ -467,6 +466,7 @@ const decrementFrequency = () => {
   justify-content: center;
   align-items: center;
   overflow-y: auto; /* 添加滚动功能 */
+  z-index: 9999; /* 确保弹窗在最上层 */
 }
 
 .modal-content {
@@ -475,6 +475,7 @@ const decrementFrequency = () => {
   border-radius: 5px;
   width: 90%;
   max-width: 500px;
+  z-index: 10000; /* 确保内容在最上层 */
 }
 
 .form {
