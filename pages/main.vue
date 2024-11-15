@@ -327,7 +327,7 @@
       class="picture"
       style="width: 90%; margin-left: 5%; margin-bottom: 15%; z-index: 1"
     >
-      <div class="block text-center" style="text-align: center">
+      <div style="text-align: center">
         <el-carousel height="200px">
           <el-carousel-item v-for="item in imageUrl" :key="item">
             <img

@@ -145,8 +145,9 @@ const updateAppointmentTime = () => {
   ).value;
   const [date, time] = meetingTime.split("T");
   appointmentDate.value = date;
-  appointmentTime.value = time + ":00";
+  appointmentTime.value = time + ":00"; // 添加秒数
 };
+
 const handleFileUpload = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (input.files) {
@@ -183,7 +184,7 @@ const submitAppointment = async () => {
 
   try {
     const response = await service.post(
-      "http://localhost:8080/appointments/appointments",
+      "/appointments/appointments",
       formData,
       {
         headers: {

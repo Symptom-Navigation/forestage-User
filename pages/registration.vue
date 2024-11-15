@@ -37,37 +37,56 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { Search } from "@element-plus/icons-vue";
 import { onMounted, reactive, ref } from "vue";
 import service from "../utils/request";
 
-const doctorsArr: any = reactive([]);
+interface Doctor {
+  id: number;
+  department: string;
+  title: string;
+  username: string;
+  password: string;
+  createdAt: string;
+  updatedAt: string;
+  avatar: string | null;
+  name: string;
+}
+
+const doctorsArr = reactive<Doctor[]>([]);
 const searchQuery = ref("");
-const filteredDoctors = ref([...doctorsArr]);
+const filteredDoctors = reactive<Doctor[]>([]);
 
 const filterDoctors = () => {
   const query = searchQuery.value.toLowerCase();
-  filteredDoctors.value = doctorsArr.filter(
-    (doctor: any) =>
-      doctor.username.toLowerCase().includes(query) ||
-      doctor.department.toLowerCase().includes(query)
+  filteredDoctors.splice(
+    0,
+    filteredDoctors.length,
+    ...doctorsArr.filter(
+      (doctor) =>
+        doctor.username.toLowerCase().includes(query) ||
+        doctor.department.toLowerCase().includes(query)
+    )
   );
 };
 
-// onMounted(async () => {
-//   const res = await service.get("/appointments/QueryAllDoctors");
-//   console.log(res.data);
-//   doctorsArr.push(...res.data.doctors);
-//   filterDoctors(); // 更新数据后重新筛选
-// });
 onMounted(async () => {
-  const res = await service.get("/appointments/QueryAllDoctors");
-  console.log("API Response:", res.data);
+  try {
+    const res = await service.get("/appointments/QueryAllDoctors");
+    console.log("Full API Response:", res.doctors);
+    if (res.doctors && Array.isArray(res.doctors)) {
+      doctorsArr.push(...res.doctors);
+      filterDoctors(); // 获取数据后更新筛选列表
+    } else {
+      console.error("Invalid response structure:", res);
+    }
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+  }
 });
 
-const toRegister = (item: any) => {
+const toRegister = (item: Doctor) => {
   navigateTo({ path: "/reg2", query: { doctorInfo: JSON.stringify(item) } });
 };
 </script>
