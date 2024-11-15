@@ -22,7 +22,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
   }
   const token = getToken();
   console.log('Navigating to:', to.path);
-  console.log('Token:', token);
+  console.log('Token1:', token);
   if (!token && !whiteList.includes(to.path)) {
     console.log('No token, redirecting to login');
     return navigateTo('/login');

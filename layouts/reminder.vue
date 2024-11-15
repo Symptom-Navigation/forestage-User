@@ -72,7 +72,6 @@
                 type="datetime-local"
                 v-model="customTimes[index]"
                 class="form-input"
-                readonly
               />
             </div>
             <div class="custom-time-buttons">
@@ -175,8 +174,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import axios from "axios";
+import service from "../utils/request";
 
 interface Reminder {
   id: string;
@@ -184,34 +184,12 @@ interface Reminder {
   nextTime: string;
   startTime: string;
   endTime: string;
-  timeRepeat: string;
+  timeRepeat: string[];
   username: string;
   prevTime: string;
 }
 
-const reminders = ref<Reminder[]>([
-  {
-    id: "1",
-    username: "",
-    prevTime: "",
-    name: "吃药",
-    nextTime: "2024-11-13T08:00:00Z",
-    startTime: "2024-11-13T07:00:00Z",
-    endTime: "2024-11-13T08:30:00Z",
-    timeRepeat: "每天一次",
-  },
-  {
-    id: "2",
-    name: "量体温",
-    username: "",
-    prevTime: "",
-    nextTime: "2024-11-13T12:00:00Z",
-    startTime: "2024-11-13T12:00:00Z",
-    endTime: "2024-11-13T13:00:00Z",
-    timeRepeat: "每天一次",
-  },
-]);
-
+const reminders = ref<Reminder[]>([]);
 const showAddReminderModal = ref(false);
 const showManageRemindersModal = ref(false);
 const showEditReminderModal = ref(false);
@@ -219,12 +197,12 @@ const showEditReminderModal = ref(false);
 const newReminder = ref<Reminder>({
   id: "",
   name: "",
-  username: "Test",
+  username: "",
   prevTime: "",
   nextTime: "",
   startTime: "",
   endTime: "",
-  timeRepeat: "",
+  timeRepeat: [],
 });
 
 const currentReminder = ref<Reminder>({
@@ -233,8 +211,8 @@ const currentReminder = ref<Reminder>({
   nextTime: "",
   startTime: "",
   endTime: "",
-  timeRepeat: "",
-  username: "Test",
+  timeRepeat: [],
+  username: "",
   prevTime: "",
 });
 
@@ -242,9 +220,42 @@ const frequency = ref<number | null>(null);
 const reminderTime = ref<string>("");
 const customTimes = ref<string[]>([]);
 
+const userData = reactive({
+  id: "",
+  username: "",
+  age: "",
+  avatar: "",
+  createdAt: "",
+  gender: "",
+  updatedA: "",
+  phoneNumber: "",
+  idCardNumber: "",
+  password: "",
+});
+const loading = ref(true);
+
+onMounted(async () => {
+  try {
+    const res = await service.get("/auth/user/info");
+    console.log("API Response:", res.data);
+    if (res.status === 200) {
+      Object.assign(userData, res.data);
+      console.log("Updated userData:", userData);
+      // 更新 newReminder 和 currentReminder 的用户名
+      newReminder.value.username = userData.username;
+      currentReminder.value.username = userData.username;
+      fetchReminders();
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  } finally {
+    loading.value = false;
+  }
+});
+
 const fetchReminders = () => {
   axios
-    .get("http://localhost:8084/reminder?username=Test")
+    .get(`http://localhost:8084/reminder?username=${userData.username}`)
     .then((response) => {
       reminders.value = response.data;
     })
@@ -265,6 +276,37 @@ const completeReminder = (id: string) => {
 };
 
 const addReminder = () => {
+  const now = new Date().toISOString();
+  newReminder.value.prevTime = now;
+  newReminder.value.nextTime = now;
+
+  // 确保 startTime 和 endTime 包含秒
+  const startTime = new Date(newReminder.value.startTime);
+  newReminder.value.startTime = startTime.toISOString();
+
+  const endTime = new Date(newReminder.value.endTime);
+  newReminder.value.endTime = endTime.toISOString();
+
+  // 生成 timeRepeat 数组
+  if (reminderTime.value === "custom") {
+    newReminder.value.timeRepeat = customTimes.value.map((time) => {
+      const date = new Date(time);
+      return date.toISOString();
+    });
+  } else if (frequency.value) {
+    const interval = 24 / frequency.value;
+    newReminder.value.timeRepeat = [];
+    for (let i = 1; i <= frequency.value; i++) {
+      const reminderTime = new Date(
+        startTime.getTime() + i * interval * 60 * 60 * 1000
+      );
+      newReminder.value.timeRepeat.push(reminderTime.toISOString());
+    }
+  }
+
+  // 打印请求数据以进行调试
+  console.log("Request Data:", newReminder.value);
+
   axios
     .put("http://localhost:8084/reminder", newReminder.value)
     .then((response) => {
@@ -312,12 +354,12 @@ const resetNewReminder = () => {
   newReminder.value = {
     id: "",
     name: "",
-    username: "Test",
+    username: userData.username,
     prevTime: "",
     nextTime: "",
     startTime: "",
     endTime: "",
-    timeRepeat: "",
+    timeRepeat: [],
   };
 };
 
@@ -353,8 +395,6 @@ const decrementFrequency = () => {
     calculateReminderTimes();
   }
 };
-
-onMounted(fetchReminders);
 </script>
 
 <style scoped>

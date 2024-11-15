@@ -201,7 +201,17 @@ const goToChat = (chatId: number) => {
 };
 
 const connectWebSocket = () => {
-  const ws = new WebSocket("ws://localhost:8081", ["jwt-token"]);
+  const tokenObj = getToken();
+  console.error("Token2:", tokenObj);
+  const token = typeof tokenObj === "string" ? tokenObj : tokenObj.token;
+  if (!token) {
+    console.error("No JWT token found");
+    return;
+  }
+
+  const wsUrl = `ws://localhost:8081?token=${token}`;
+  console.error("WebSocket URL:", wsUrl);
+  const ws = new WebSocket(wsUrl);
 
   ws.onmessage = (event) => {
     const message: Message = JSON.parse(event.data);
@@ -239,6 +249,7 @@ onMounted(() => {
   connectWebSocket();
 });
 </script>
+
 <style scoped>
 .com-top-bar {
   height: 200px;

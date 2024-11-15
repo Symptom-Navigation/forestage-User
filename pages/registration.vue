@@ -43,44 +43,28 @@ import { Search } from "@element-plus/icons-vue";
 import { onMounted, reactive, ref } from "vue";
 import service from "../utils/request";
 
-const doctorsArr = reactive([
-  {
-    username: "",
-    title: "",
-    department: "",
-    avatar: "https://img.picui.cn/free/2024/09/23/66f09663bc715.png",
-  },
-]);
-
+const doctorsArr: any = reactive([]);
 const searchQuery = ref("");
 const filteredDoctors = ref([...doctorsArr]);
 
 const filterDoctors = () => {
   const query = searchQuery.value.toLowerCase();
   filteredDoctors.value = doctorsArr.filter(
-    (doctor) =>
+    (doctor: any) =>
       doctor.username.toLowerCase().includes(query) ||
       doctor.department.toLowerCase().includes(query)
   );
 };
 
+// onMounted(async () => {
+//   const res = await service.get("/appointments/QueryAllDoctors");
+//   console.log(res.data);
+//   doctorsArr.push(...res.data.doctors);
+//   filterDoctors(); // 更新数据后重新筛选
+// });
 onMounted(async () => {
-  try {
-    const res = await service.get("/appointments/QueryAllDoctors");
-    console.log("Updated userData:", res);
-    if (res.data && res.data.code === "200") {
-      const doctors = res.data.map((doctor: any) => ({
-        ...doctor,
-        avatar: "https://img.picui.cn/free/2024/09/23/66f09663bc715.png",
-      }));
-      doctorsArr.push(...doctors);
-      filterDoctors(); // 更新数据后重新筛选
-    } else {
-      console.error("数据格式不正确或code属性不存在");
-    }
-  } catch (error) {
-    console.error("Error fetching doctors:", error);
-  }
+  const res = await service.get("/appointments/QueryAllDoctors");
+  console.log("API Response:", res.data);
 });
 
 const toRegister = (item: any) => {
